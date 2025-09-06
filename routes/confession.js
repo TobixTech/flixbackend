@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Confession = require('../models/Confession');
 const Reply = require('../models/Reply');
 const Flag = require('../models/Flag');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const harmfulKeywords = ['self-harm', 'suicide', 'threat'];
 
@@ -87,25 +88,19 @@ router.post('/frixai/reply', async (req, res) => {
   }
 
   try {
-    // This is a placeholder for the actual Gemini API call
-    // You'll need to use an SDK like '@google/generative-ai'
-    // For now, we'll simulate a response
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     
-    // Example:
-    // const { GoogleGenerativeAI } = require('@google/generative-ai');
-    // const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    // const result = await model.generateContent(text);
-    // const response = await result.response;
-    // const aiReply = response.text;
+    const result = await model.generateContent(text);
+    const response = await result.response;
+    const aiReply = response.text();
 
-    const aiReply = "Thank you for sharing your thoughts. I'm here to listen.";
-    
     res.json({ reply: aiReply });
+    
   } catch (err) {
+    console.error('Gemini API Error:', err);
     res.status(500).json({ message: 'Error with AI reply.', error: err.message });
   }
 });
 
 module.exports = router;
-      
